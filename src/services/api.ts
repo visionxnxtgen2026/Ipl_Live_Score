@@ -1,8 +1,9 @@
-// API service layer. Mock data simulates real endpoints.
-// Swap MOCK_MODE=false and set baseURL to plug in real APIs (RapidAPI cricket, etc.)
+// API service layer.
+// Live data (matches/live/commentary/news) -> backend proxy -> RapidAPI Cricbuzz + GNews.
+// Static data (teams/players details) stays mocked since Cricbuzz IDs differ from our slugs.
 import axios from "axios";
 
-const MOCK_MODE = true;
+const USE_LIVE_API = true; // backend proxy on /api/* (server-side key)
 export const api = axios.create({ baseURL: "/api" });
 
 // ---------- Types ----------
