@@ -43,7 +43,7 @@ function computeMatchPulse(live: any) {
   const runs = live.score.runs || 0;
   const wkts = live.score.wickets || 0;
   const currentRR = overs > 0 ? runs / overs : 0;
-  const recentOvs: { runs: number; wickets: number }[] = live.overSummary?.slice(-5) ?? [];
+  const recentOvs: { over: number; runs: number; wickets: number }[] = live.overSummary?.slice(-5) ?? [];
   const recentRuns = recentOvs.reduce((a, o) => a + o.runs, 0);
   const recentWkts = recentOvs.reduce((a, o) => a + o.wickets, 0);
   const recentRR = recentOvs.length ? recentRuns / recentOvs.length : currentRR;
