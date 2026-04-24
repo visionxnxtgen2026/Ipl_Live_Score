@@ -75,4 +75,4 @@ export const Route = createFileRoute("/api/live/$id")({
       },
     },
   },
-});
+} as any);

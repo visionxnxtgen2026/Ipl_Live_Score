@@ -42,4 +42,4 @@ export const Route = createFileRoute("/api/commentary/$id")({
       },
     },
   },
-});
+} as any);

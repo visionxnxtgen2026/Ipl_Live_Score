@@ -44,4 +44,4 @@ export const Route = createFileRoute("/api/match/$id")({
       },
     },
   },
-});
+} as any);
