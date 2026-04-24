@@ -32,7 +32,44 @@ function ballColor(b: string) {
   if (b === "6") return "bg-destructive";
   if (b === "Wd" || b === "Nb" || b === "1b") return "bg-amber-500";
   if (b === ".") return "bg-muted text-muted-foreground";
+  if (b === "W") return "bg-red-700";
   return "bg-emerald-600";
+}
+
+// Compute win probability + momentum from recent over data.
+// Heuristic: chasing-team prob = clamp(50 + (currentRR - requiredRR)*8 - wicketsLost*4 + momentumBonus)
+function computeMatchPulse(live: any) {
+  const overs = parseFloat(live.score.overs) || 0;
+  const runs = live.score.runs || 0;
+  const wkts = live.score.wickets || 0;
+  const currentRR = overs > 0 ? runs / overs : 0;
+  const recentOvs: { runs: number; wickets: number }[] = live.overSummary?.slice(-5) ?? [];
+  const recentRuns = recentOvs.reduce((a, o) => a + o.runs, 0);
+  const recentWkts = recentOvs.reduce((a, o) => a + o.wickets, 0);
+  const recentRR = recentOvs.length ? recentRuns / recentOvs.length : currentRR;
+
+  let battingProb = 50;
+  let label = "Even contest";
+  if (live.target) {
+    const ballsLeft = Math.max(1, (20 - overs) * 6);
+    const runsNeeded = Math.max(0, live.target - runs);
+    const requiredRR = (runsNeeded / ballsLeft) * 6;
+    battingProb = 50 + (recentRR - requiredRR) * 7 - wkts * 3 - recentWkts * 4;
+    if (runsNeeded <= 0) battingProb = 99;
+    label = battingProb > 65 ? `${live.battingTeam} favourites` : battingProb < 35 ? `${live.bowlingTeam} ahead` : "On a knife's edge";
+  } else {
+    // 1st innings — momentum proxy
+    battingProb = 50 + (recentRR - currentRR) * 6 - recentWkts * 5;
+    label = recentRR > currentRR + 1 ? "Batting team building" : recentWkts >= 2 ? "Bowlers fighting back" : "Steady phase";
+  }
+  battingProb = Math.max(2, Math.min(98, battingProb));
+
+  // Momentum: net runs swing in last 5 overs vs match average
+  const avgPerOver = overs > 0 ? runs / overs : 0;
+  const momentumDelta = recentRR - avgPerOver - recentWkts * 1.5;
+  const momentumPct = Math.max(-100, Math.min(100, momentumDelta * 25));
+
+  return { battingProb, bowlingProb: 100 - battingProb, label, momentumPct, recentOvs };
 }
 
 function LivePage() {
