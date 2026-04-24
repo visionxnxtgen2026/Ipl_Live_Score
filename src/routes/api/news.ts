@@ -31,4 +31,4 @@ export const Route = createFileRoute("/api/news")({
       },
     },
   },
-});
+} as any);
