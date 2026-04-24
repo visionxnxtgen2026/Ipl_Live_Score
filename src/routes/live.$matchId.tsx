@@ -189,6 +189,58 @@ function LivePage() {
 
         {/* Sidebar */}
         <aside className="space-y-4">
+          {/* Win probability + momentum */}
+          {(() => {
+            const pulse = computeMatchPulse(live);
+            return (
+              <div className="rounded-2xl border border-border/60 gradient-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold">Win Probability</h4>
+                  <span className="text-[10px] text-muted-foreground">live model</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold mb-2">
+                  <span>{live.battingTeam || "Bat"}</span>
+                  <span>{live.bowlingTeam || "Bowl"}</span>
+                </div>
+                <div className="relative h-3 w-full rounded-full bg-muted overflow-hidden">
+                  <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700" style={{ width: `${pulse.battingProb}%` }} />
+                </div>
+                <div className="flex justify-between text-[11px] text-muted-foreground mt-1.5">
+                  <span>{pulse.battingProb.toFixed(0)}%</span>
+                  <span>{pulse.bowlingProb.toFixed(0)}%</span>
+                </div>
+                <div className="mt-3 text-center text-xs font-semibold text-primary">{pulse.label}</div>
+
+                <div className="mt-4 pt-4 border-t border-border/60">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold">Momentum</span>
+                    <span className={`text-[10px] font-bold ${pulse.momentumPct > 10 ? "text-emerald-500" : pulse.momentumPct < -10 ? "text-destructive" : "text-muted-foreground"}`}>
+                      {pulse.momentumPct > 10 ? "▲ Batting" : pulse.momentumPct < -10 ? "▼ Bowling" : "— Neutral"}
+                    </span>
+                  </div>
+                  <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div className="absolute top-0 bottom-0 left-1/2 w-px bg-border" />
+                    <div
+                      className={`absolute inset-y-0 ${pulse.momentumPct >= 0 ? "left-1/2 bg-emerald-500" : "right-1/2 bg-destructive"} transition-all duration-700`}
+                      style={{ width: `${Math.abs(pulse.momentumPct) / 2}%` }}
+                    />
+                  </div>
+                  {pulse.recentOvs.length > 0 && (
+                    <div className="mt-3 flex gap-1 items-end h-10">
+                      {pulse.recentOvs.map((o, i) => (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full bg-primary/60 rounded-sm transition-all" style={{ height: `${Math.min(100, (o.runs / 20) * 100)}%` }} title={`Over ${o.over}: ${o.runs} runs, ${o.wickets}w`} />
+                          {o.wickets > 0 && <span className="text-[8px] text-destructive font-bold">{o.wickets}W</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-1 text-center text-[10px] text-muted-foreground">Last {pulse.recentOvs.length || 5} overs</div>
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="rounded-2xl border border-border/60 gradient-card p-5">
             <h4 className="font-semibold mb-3 flex items-center justify-between">Recent Balls <span className="text-[10px] text-muted-foreground font-normal">auto-updating</span></h4>
             <div className="flex gap-1.5 flex-wrap">
